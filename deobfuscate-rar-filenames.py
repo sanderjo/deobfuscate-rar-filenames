@@ -48,3 +48,4 @@ for file in os.listdir(path):
         os.rename(file, newname)
     else:
         logging.debug("Skipping (as not a rar file): %s", file)
+
