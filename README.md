@@ -7,6 +7,7 @@ deobfuscate rar filenames
 ./deobfuscate-rar-filenames.py
 ```
 
+## Example
 
 ```
 ./deobfuscate-rar-filenames.py 
