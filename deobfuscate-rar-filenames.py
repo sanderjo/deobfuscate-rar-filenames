@@ -19,7 +19,7 @@ def rarordernumber(filename):
     """
 	returns rar order number if it's a rar file
 	and returns None if it's not a rar file
-	Line to find, then last parameter: Details: RAR 5, volume 3
+	Line to find, then last parameter: "Details: RAR 5, volume 3"
 	"""
     rarcommand = "rar"
     command = (rarcommand + " l " + filename).split()
