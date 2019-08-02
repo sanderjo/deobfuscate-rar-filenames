@@ -43,9 +43,11 @@ if ba[0:4] != 'Rar!':
 	print "Not a rar file!!!"
 	sys.exit(-1)
 
+'''
 # Reverse engineering: start at 17
 i=17 # reverse engineering, only works if there is one file in this rar file ...
 print "Volume Number result is", ReadVint(ba,i)
+'''
 
 
 # A bit more sophisticated:
@@ -58,11 +60,38 @@ while x<17:
 	else:
 		high += 1
 	x += 1
+	if low == 4:
+		# This is archive Flags:
+		archiveflags = ReadVint(ba,x)
+		print "archiveflags: ", archiveflags
+		print "archiveflags bitwise and with 0x0002", archiveflags & 2
 	if low >= 5:
+		break
+
+
+# print "Unset high bit, so number separate vint-values:", low, "(FWIW: high bit set:", high, ")"
+print "Volume Number result is (after 5 vint):", ReadVint(ba,x)
+
+
+
+'''
+vintcounter = 0
+x = 12 	# skip "Rar! ..." (8 bytes, so on byte 0 -7) and CRC (4 bytes, so on byte 8 - 11)
+while x<17:
+	if ba[x] < 128:
+		vintcounter +=1
+
+	if vintcounter == 4:
+		# This is archive Flags:
+		archiveflags = ReadVint(ba,x)
+		print "archiveflags: ", archiveflags
+		print "archiveflags bitwise and with 0x0002", archiveflags & 2
+	if vintcounter >= 5:
 		break
 
 # print "Unset high bit, so number separate vint-values:", low, "(FWIW: high bit set:", high, ")"
 print "Volume Number result is (after 5 vint):", ReadVint(ba,x)
 
 
+'''
 
