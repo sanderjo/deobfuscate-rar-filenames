@@ -1,10 +1,13 @@
 #!/usr/bin/env python2
 
-# only works for rar5 format
+# works for rar5 format
+# rar3/rar4 ... seems to work so far
 
 import sys
 
 '''
+For rar5 format:
+
 Definition of vint: https://www.rarlab.com/technote.htm#vint
 Examples:
 
@@ -59,14 +62,15 @@ ba = bytearray(fh.read())
 
 # Is it a rar?
 
-# Rar4:
-# Just for comparison this is RAR 4.x 7 byte length signature: 0x52 0x61 0x72 0x21 0x1A 0x07 0x00.
-# https://www.forensicswiki.org/wiki/RAR
-
-
 # Older rar: 0x 52 45 7E 5E 
 
 
+# Rar4:
+# https://www.forensicswiki.org/wiki/RAR
+
+
+
+rar4sigdefinition = [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x00] # RAR 4.x 7 byte length signature: 0x52 0x61 0x72 0x21 0x1A 0x07 0x00.
 rar5sigdefinition = [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x01, 0x00] # RAR 5.0 signature consists of 8 bytes: 0x52 0x61 0x72 0x21 0x1A 0x07 0x01 0x00
 # Get first 8 bytes from the bytearray:
 rarsignature = readandremoveNfirstbytes(ba,8)
@@ -78,34 +82,41 @@ while i < 8:
 		# No match, so ...
 		break
 	i += 1
-print "Matching i", i
+#print "Matching i", i
 
+
+volumenumber = -1
 # ... which results in:
 if i < 3:
 	print "Not a rar file at all"
 	sys.exit(-1)
-elif i == 6:
-	print "A rar4 file, not yet supported"
+elif i == 6 and rar4sigdefinition[i] == rarsignature[i]:
+	#rar4 ... warning: hacked together:
+	pos = len(ba)
+	volumenumber = 1 + ba[pos-9] + 256 * ba[pos-8] 
+	
 elif i < 8:
 	print "A rar file, but not a RAR5 file"
 	sys.exit(-1)
-
 	
-# Proceeed with the other fields:
+elif i >= 8:
+	# rar5
+	# Proceeed with the other fields (after the Rar! signature):
+	crc32 = readandremoveNfirstbytes(ba,4) # 32bits so 4 bytes
+	headersize = readandremoveVINT(ba)
+	headertype = readandremoveVINT(ba)
+	headerflags = readandremoveVINT(ba)
+	extraareasize= readandremoveVINT(ba)
+	archiveflags = readandremoveVINT(ba)
+	if archiveflags & 2 :
+		volumenumber = 1 + readandremoveVINT(ba)
+	else:
+		# first volume, aka 1
+		volumenumber = 1
 
-crc32 = readandremoveNfirstbytes(ba,4) # 32bits so 4 bytes
-
-headersize = readandremoveVINT(ba)
-headertype = readandremoveVINT(ba)
-headerflags = readandremoveVINT(ba)
-extraareasize= readandremoveVINT(ba)
-archiveflags = readandremoveVINT(ba)
-
-if archiveflags & 2 :
-	volumenumber = 1 + readandremoveVINT(ba)
-else:
-	# first volume, aka 1
-	volumenumber = 1
+else :
+	# we should not get here
+	volumenumber = -2
 
 print "volumenumber is", volumenumber
 
