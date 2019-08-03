@@ -54,10 +54,19 @@ def readandremoveVINT(myba):
 # MAIN
 
 # Open file passed as argument, and put into a bytearray
-fh = open(sys.argv[1])
+fh = open(sys.argv[1],"rb")
 ba = bytearray(fh.read())
 
 # Is it a rar?
+
+# Rar4:
+# Just for comparison this is RAR 4.x 7 byte length signature: 0x52 0x61 0x72 0x21 0x1A 0x07 0x00.
+# https://www.forensicswiki.org/wiki/RAR
+
+
+# Older rar: 0x 52 45 7E 5E 
+
+
 rar5sigdefinition = [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x01, 0x00] # RAR 5.0 signature consists of 8 bytes: 0x52 0x61 0x72 0x21 0x1A 0x07 0x01 0x00
 # Get first 8 bytes from the bytearray:
 rarsignature = readandremoveNfirstbytes(ba,8)
@@ -69,11 +78,14 @@ while i < 8:
 		# No match, so ...
 		break
 	i += 1
+print "Matching i", i
 
 # ... which results in:
 if i < 3:
 	print "Not a rar file at all"
 	sys.exit(-1)
+elif i == 6:
+	print "A rar4 file, not yet supported"
 elif i < 8:
 	print "A rar file, but not a RAR5 file"
 	sys.exit(-1)
