@@ -2,6 +2,8 @@
 
 # only works for rar3 / rar4 format
 
+# Hacked together based on reverse engineering with hd and diff
+
 import sys
 
 '''
