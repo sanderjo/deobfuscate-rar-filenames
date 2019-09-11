@@ -80,6 +80,18 @@ israr5 = ba[:len(rar5sigdefinition)] == bytearray(rar5sigdefinition)
 
 volumenumber = -1
 if israr4:
+	print("rar3/rar4")
+	# Let's find the numbering scheme
+	# ba still contains the first 250 bytes
+      
+	HEAD_FLAGS_LSB = ba[10]	# LSB = Least Significant Byte
+	if HEAD_FLAGS_LSB & 0x10 :
+		print("New Numbering Scheme")
+	else:
+		print("Old Numbering Scheme")
+
+
+
 	# It's a rar4, which has the volume number at the end of the rar file 
         # ... warning: hacked together:
 	# From the end of the file, we need about 20 bytes
@@ -88,7 +100,11 @@ if israr4:
 	ba = bytearray(fh.read())
 	volumenumber = 1 + ba[-9] + 256 * ba[-8] 
 
+
+
 elif israr5:
+	print("rar5")
+	print("New Numbering Scheme")
 	# It's a rar5
 	# rar5 has the volume number in the beginning of the rar file, after some other (variable length) info:
 	# So process them:
